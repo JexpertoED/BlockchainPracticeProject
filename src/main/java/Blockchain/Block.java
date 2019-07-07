@@ -32,7 +32,7 @@ public class Block {
 
     public String calculateHash() {
         String headers = this.previousHash + this.data + this.timeStamp ;
-        return SHA256.getSHA(headers);
+        return SHA256.sha256(headers);
     }
 
     public static Block generateBlock(String data, String previousHash) {
