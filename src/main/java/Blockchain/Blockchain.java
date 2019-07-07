@@ -14,19 +14,19 @@ public class Blockchain {
         this.blocks = blocks;
     }
 
-    public Blockchain() {
-        List<Block> blocks = new ArrayList<Block>(1);
+    Blockchain() {
+        List<Block> blocks = new ArrayList<>(1);
         blocks.add(newGenesisBlock());
         this.blocks = blocks;
     }
 
     public void addBlock(String data) {
         Block prevBlock = this.blocks.get(this.blocks.size() - 1);
-        Block newBlock = Block.generateBlock(data, prevBlock.calculateHash());
+        Block newBlock = Block.generateBlock(data, prevBlock.getHash());
         this.blocks.add(newBlock);
     }
 
-    public Block newGenesisBlock() {
+    private Block newGenesisBlock() {
         return Block.generateBlock("Genesis Block", "");
     }
 

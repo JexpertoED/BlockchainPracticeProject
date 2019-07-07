@@ -10,6 +10,7 @@ public class BlockChainExample {
             System.out.println("Prev. hash: " +  block.getPreviousHash());
             System.out.println("Data: " +  block.getData());
             System.out.println("Hash: " +  block.getHash());
+            System.out.println("Is valid: " +  ProofOfWork.Validate(block,block.getNonce()));
             System.out.println();
         }
     }
