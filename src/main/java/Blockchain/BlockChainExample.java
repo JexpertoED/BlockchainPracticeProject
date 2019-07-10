@@ -3,7 +3,7 @@ package main.java.Blockchain;
 public class BlockChainExample {
 
 
-    //TODO Transactions, Signature, Merkly tree for blocks, sign blocks, nodes (optional),
+    //TODO Transactions, Signature, Merkly tree for blocks, sign blocks, nodes (optional), unverified transaction pool
     public static void main(String[] args) {
         Blockchain bc = new Blockchain();
         bc.addBlock("Send 1 BTC to Ivan");

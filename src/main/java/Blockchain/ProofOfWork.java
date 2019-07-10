@@ -1,10 +1,10 @@
 package main.java.Blockchain;
 
-public class ProofOfWork {
-    private static final int targetZeroes = 3; //number of zeroes * 4
+class ProofOfWork {
+    private static final int targetZeroes = 10; //number of zeroes * 4
     private Long nonce = -1L;
     private static final int globalThreads = Runtime.getRuntime().availableProcessors();
-    public Block block;
+    Block block;
 
     ProofOfWork(Block block) {
         this.block = block;
@@ -21,7 +21,7 @@ public class ProofOfWork {
     }
 
 
-    public void findProof() throws InterruptedException {
+    void findProof() throws InterruptedException {
         startOptimal();
         this.block.setNonce(nonce);
         this.block.setHash(SHA256.sha256(prepareData(nonce)));
@@ -63,7 +63,7 @@ public class ProofOfWork {
         a.join();
     }
 
-    public static boolean Validate(Block b, long nonce) {
+    static boolean Validate(Block b, long nonce) {
         String data = prepareData(b,nonce);
         StringBuilder stringBuilder = new StringBuilder();
         for (int i = 0; i < targetZeroes; i++) {
