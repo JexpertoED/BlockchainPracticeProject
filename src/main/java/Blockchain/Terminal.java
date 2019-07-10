@@ -1,13 +1,13 @@
 package main.java.Blockchain;
 
-public class BlockChainExample {
+public class Terminal {
 
 
     //TODO Transactions, Signature, Merkly tree for blocks, sign blocks, nodes (optional), unverified transaction pool
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         Blockchain bc = new Blockchain();
-        bc.addBlock("Send 1 BTC to Ivan");
-        bc.addBlock("Send 2 more BTC to Ivan");
+        bc.run();
+        bc.connectionTest();
         for (Block block : bc.getBlocks()) {
             System.out.println("Prev. hash: " +  block.getPreviousHash());
             System.out.println("Data: " +  block.getData());

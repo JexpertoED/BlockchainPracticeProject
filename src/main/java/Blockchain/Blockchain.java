@@ -1,18 +1,63 @@
 package main.java.Blockchain;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Blockchain {
+class Blockchain {
+    private static final int blockSize = 4;
     private List<Block> blocks;
+    private ArrayList<Transaction> transactionPool = new ArrayList<>();
 
     List<Block> getBlocks() {
         return blocks;
     }
 
-    public Blockchain(List<Block> blocks) {
-        this.blocks = blocks;
+
+    void run() throws InterruptedException {
+        Thread a;
+        a = new Thread(() -> {
+            ArrayList<Transaction> temp = new ArrayList<>();
+            while (true) {
+                synchronized (transactionPool) {
+                    try {
+                        if (!transactionPool.isEmpty() || temp.size() >= blockSize) {
+
+                            temp.add(transactionPool.get(0));
+                            transactionPool.remove(0);
+                        } else if (!temp.isEmpty()) {
+                            addBlock(temp);
+                            temp = new ArrayList<>();
+                        }
+                    } catch (IndexOutOfBoundsException ignore) {
+                    }
+                }
+            }
+        });
+        a.start();
+        //a.join();
+
     }
+
+    void connectionTest() throws IOException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+        UserInterface t = new UserInterface(transactionPool);
+        t.addTransactionToPool(new Transaction("123".getBytes(), "1231245".getBytes(), "5543".getBytes(), true, "addresshash".getBytes()));
+        t.addTransactionToPool(new Transaction("12asd3".getBytes(), "1asda231245".getBytes(), "5fgh543".getBytes(), true, "addresshasadsh".getBytes()));
+        t.addTransactionToPool(new Transaction("12fsh3".getBytes(), "123sfgh1245".getBytes(), "554dfgh3".getBytes(), true, "addressasdfhgjhash".getBytes()));
+        t.addTransactionToPool(new Transaction("12fsh3".getBytes(), "123sfgh1245".getBytes(), "554dfgh3".getBytes(), true, "addressasdfhgjhash".getBytes()));
+        t.addTransactionToPool(new Transaction("12123fsh3".getBytes(), "123s456fgh1245".getBytes(), "554456dfgh3".getBytes(), true, "addressasdfhgjhash".getBytes()));
+        t.addTransactionToPool(new Transaction("12f12378sh3".getBytes(), "123sfg789h1245".getBytes(), "554d46456fgh3".getBytes(), true, "address789746as456dfhgjhash".getBytes()));
+        t.addTransactionToPool(new Transaction("12f4564sh3".getBytes(), "123sfg7123h1245".getBytes(), "554df123456gh3".getBytes(), true, "address457sdfhgjhash".getBytes()));
+        for (Transaction transactions : transactionPool) {
+            //System.out.println(transactions);
+        }
+    }
+
 
     Blockchain() {
         List<Block> blocks = new ArrayList<>(1);
@@ -20,21 +65,27 @@ public class Blockchain {
         this.blocks = blocks;
     }
 
-    void addBlock(String data) {
+    private void addBlock(ArrayList<Transaction> transactions) {
         Block prevBlock = this.blocks.get(this.blocks.size() - 1);
-        Block newBlock = Block.generateBlock(data, prevBlock.getHash());
+        Block newBlock = Block.generateBlock(transactions, prevBlock.getHash());
         this.blocks.add(newBlock);
     }
 
     private Block newGenesisBlock() {
-        return Block.generateBlock("Genesis Block", "");
+        ArrayList<Transaction> gen = new ArrayList<>();
+        try {
+            gen.add(new Transaction(new byte[0], "Genesis block".getBytes(), "Genesis block".getBytes(), true, "temp".getBytes()));
+        } catch (NoSuchAlgorithmException | SignatureException | InvalidKeyException | IOException e) {
+            e.printStackTrace();
+        }
+        return Block.generateBlock(gen, new byte[0]);
     }
 
 //////////////////////////////
 
     private static final char[] HEX_ARRAY = "0123456789abcdef".toCharArray();
 
-    public static String bytesToHex(byte[] bytes) {         //converters
+    static String bytesToHex(byte[] bytes) {         //converters
         char[] hexChars = new char[bytes.length * 2];
         for (int j = 0; j < bytes.length; j++) {
             int v = bytes[j] & 0xFF;
@@ -43,15 +94,22 @@ public class Blockchain {
         }
         return new String(hexChars);
     }
-    public static byte[] hexStringToByteArray(String s) {
-        int len = s.length();
-        byte[] data = new byte[len / 2];
-        for (int i = 0; i < len; i += 2) {
-            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-                    + Character.digit(s.charAt(i+1), 16));
+
+    static byte[] hexStringToByteArray(String s) {
+        int length = s.length();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        for (int i = 0; i < length; i += 2) {
+            BigInteger bigInt;
+            try {
+                bigInt = new BigInteger(s.substring(i, i + 2), 16);
+            } catch (IndexOutOfBoundsException e) {
+                bigInt = new BigInteger(s.substring(i, i + 1), 16);
+            }
+            outputStream.write(bigInt.byteValue());
         }
-        return data;
+        return outputStream.toByteArray();
     }
+
 
 //////////////////////////////
 }

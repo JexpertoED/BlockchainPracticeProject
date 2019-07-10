@@ -1,5 +1,6 @@
 package main.java.Blockchain;
 
+import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -7,7 +8,7 @@ import java.security.NoSuchAlgorithmException;
 
 class SHA256 {
 
-    public static String sha256(String base) {
+    static String sha256(String base) {
         try{
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest(base.getBytes("UTF-8"));
@@ -23,6 +24,12 @@ class SHA256 {
         } catch(Exception ex){
             throw new RuntimeException(ex);
         }
+    }
+
+    static byte[] sha256(byte[] base) throws NoSuchAlgorithmException {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        digest.update(base);
+        return digest.digest();
     }
 
 } 

@@ -1,7 +1,11 @@
 package main.java.Blockchain;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+
 class ProofOfWork {
-    private static final int targetZeroes = 10; //number of zeroes * 4
+    private static final int targetZeroes = 3; //number of zeroes * 4
     private Long nonce = -1L;
     private static final int globalThreads = Runtime.getRuntime().availableProcessors();
     Block block;
@@ -12,19 +16,23 @@ class ProofOfWork {
 //        this.target.shiftLeft(256 - targetBits);
     }
 
-    private String prepareData(long nonce) {
-        return block.getPreviousHash() + block.getData() + block.getTimeStamp() + Integer.toHexString(targetZeroes) + Long.toHexString(nonce);
+    private static byte[] prepareData(byte[] tempHash,long nonce) throws IOException {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        output.write(tempHash);
+        output.write(Blockchain.hexStringToByteArray(Long.toHexString(nonce)));
+        return output.toByteArray();
     }
 
-    private static String prepareData(Block block, long nonce) {
-        return block.getPreviousHash() + block.getData() + block.getTimeStamp() + Integer.toHexString(targetZeroes) + Long.toHexString(nonce);
+    private static byte[] prepareData(Block block, long nonce) throws IOException {
+        byte[] tempHash = block.calculateHash();
+        return prepareData(tempHash,nonce);
     }
 
 
-    void findProof() throws InterruptedException {
+    void findProof() throws InterruptedException, IOException, NoSuchAlgorithmException {
         startOptimal();
         this.block.setNonce(nonce);
-        this.block.setHash(SHA256.sha256(prepareData(nonce)));
+        this.block.setHash(SHA256.sha256(prepareData(this.block, nonce)));
     }
 
 
@@ -42,10 +50,20 @@ class ProofOfWork {
 
                 @Override
                 public void run() {
-                    String hash;
+                    String hash = null;
+                    byte[] tempHash = block.calculateHash();
                     for (long i = threadNumber; i < Long.MAX_VALUE; i += globalThreads * 5) {
-                        String data = prepareData(i);
-                        hash = SHA256.sha256(data);
+                        byte[] data = new byte[0];
+                        try {
+                            data = prepareData(tempHash,i);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        try {
+                            hash = Blockchain.bytesToHex(SHA256.sha256(data));
+                        } catch (NoSuchAlgorithmException e) {
+                            e.printStackTrace();
+                        }
                         if (nonce > -1)
                             break;
                         if (hash.startsWith(str)) {
@@ -63,13 +81,13 @@ class ProofOfWork {
         a.join();
     }
 
-    static boolean Validate(Block b, long nonce) {
-        String data = prepareData(b,nonce);
+    static boolean Validate(Block b, long nonce) throws IOException, NoSuchAlgorithmException {
+        byte[] data = prepareData(b,nonce);
         StringBuilder stringBuilder = new StringBuilder();
         for (int i = 0; i < targetZeroes; i++) {
             stringBuilder.append(0);
         }
-        return SHA256.sha256(data).startsWith(stringBuilder.toString());
+        return Blockchain.bytesToHex(SHA256.sha256(data)).startsWith(stringBuilder.toString());
     }
 }
 
