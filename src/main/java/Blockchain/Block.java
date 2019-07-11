@@ -87,7 +87,12 @@ public class Block {
             return Blockchain.hexStringToByteArray(completeShaString(""));
         ArrayList<String> shas = new ArrayList<>(transactions.size());
         for (Transaction transaction : transactions) {
-            shas.add(SHA256.sha256(transaction.getTransactionString()));
+            try {
+                shas.add(SHA256.sha256(transaction.getTransactionString()));
+               // System.out.println(transaction.getTransactionString());
+            } catch (NullPointerException e) {
+             //   System.out.println("Null Pointer");
+            }
         }
         int count = transactions.size();
         int offset = 0;

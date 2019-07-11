@@ -20,7 +20,8 @@ class Blockchain {
 
 
     void run() throws InterruptedException {
-        Thread a;
+        Thread a = null;
+        Thread finalB = a;
         a = new Thread(() -> {
             ArrayList<Transaction> temp = new ArrayList<>();
             while (true) {
@@ -31,11 +32,18 @@ class Blockchain {
                             temp.add(transactionPool.get(0));
                             transactionPool.remove(0);
                         } else if (!temp.isEmpty()) {
+                           //System.out.println(temp);
                             addBlock(temp);
                             temp = new ArrayList<>();
                         }
                     } catch (IndexOutOfBoundsException ignore) {
                     }
+
+                }
+                try {
+                    finalB.sleep(1);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
         });
@@ -45,14 +53,14 @@ class Blockchain {
     }
 
     void connectionTest() throws IOException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
-        UserInterface t = new UserInterface(transactionPool);
-        t.addTransactionToPool(new Transaction("123".getBytes(), "1231245".getBytes(), "5543".getBytes(), true, "addresshash".getBytes()));
-        t.addTransactionToPool(new Transaction("12asd3".getBytes(), "1asda231245".getBytes(), "5fgh543".getBytes(), true, "addresshasadsh".getBytes()));
-        t.addTransactionToPool(new Transaction("12fsh3".getBytes(), "123sfgh1245".getBytes(), "554dfgh3".getBytes(), true, "addressasdfhgjhash".getBytes()));
-        t.addTransactionToPool(new Transaction("12fsh3".getBytes(), "123sfgh1245".getBytes(), "554dfgh3".getBytes(), true, "addressasdfhgjhash".getBytes()));
-        t.addTransactionToPool(new Transaction("12123fsh3".getBytes(), "123s456fgh1245".getBytes(), "554456dfgh3".getBytes(), true, "addressasdfhgjhash".getBytes()));
-        t.addTransactionToPool(new Transaction("12f12378sh3".getBytes(), "123sfg789h1245".getBytes(), "554d46456fgh3".getBytes(), true, "address789746as456dfhgjhash".getBytes()));
-        t.addTransactionToPool(new Transaction("12f4564sh3".getBytes(), "123sfg7123h1245".getBytes(), "554df123456gh3".getBytes(), true, "address457sdfhgjhash".getBytes()));
+        
+        transactionPool.add(new Transaction("123".getBytes(), "1231245".getBytes(), "5543".getBytes(), true, "addresshash".getBytes()));
+        transactionPool.add(new Transaction("12asd3".getBytes(), "1asda231245".getBytes(), "5fgh543".getBytes(), true, "addresshasadsh".getBytes()));
+        transactionPool.add(new Transaction("12fsh3".getBytes(), "123sfgh1245".getBytes(), "554dfgh3".getBytes(), true, "addressasdfhgjhash".getBytes()));
+        transactionPool.add(new Transaction("12fsh3".getBytes(), "123sfgh1245".getBytes(), "554dfgh3".getBytes(), true, "addressasdfhgjhash".getBytes()));
+        transactionPool.add(new Transaction("12123fsh3".getBytes(), "123s456fgh1245".getBytes(), "554456dfgh3".getBytes(), true, "addressasdfhgjhash".getBytes()));
+        transactionPool.add(new Transaction("12f12378sh3".getBytes(), "123sfg789h1245".getBytes(), "554d46456fgh3".getBytes(), true, "address789746as456dfhgjhash".getBytes()));
+        transactionPool.add(new Transaction("12f4564sh3".getBytes(), "123sfg7123h1245".getBytes(), "554df123456gh3".getBytes(), true, "address457sdfhgjhash".getBytes()));
         for (Transaction transactions : transactionPool) {
             //System.out.println(transactions);
         }
