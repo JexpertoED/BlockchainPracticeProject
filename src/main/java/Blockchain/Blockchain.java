@@ -7,6 +7,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 class Blockchain {
@@ -65,6 +66,26 @@ class Blockchain {
             //System.out.println(transactions);
         }
     }
+    void addTransactionToPool(Transaction transaction) throws IOException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+        transactionPool.add(transaction);
+    }
+    void addTransactionToPoolWithCheck(Transaction transaction) throws IOException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+//        boolean allowCheck = false;
+//        for (Block block : blocks){
+//            for (Transaction tr : block.getData()){
+//              if (Arrays.equals(tr.getHash(), transaction.getInput().prevHash)){
+//                  byte[] refTransactionPubKeyHash = tr.getOutput().pubKeyHash;
+//                  byte[] pubSig = transaction.getInput().scriptSig;
+//                  byte[] pubKey = Arrays.copyOf(pubSig, 91);
+//                  if (Arrays.equals(SHA256.sha256(pubKey), refTransactionPubKeyHash)){
+//                      System.out.println("!!!!!!!!!!!!PubKeys match!!!!!!!!!!!!");
+//                      iKf (transaction.)
+//                  }
+//              }
+//            }
+//        }
+//        transactionPool.add(transaction);
+    }
 
 
     Blockchain() {
@@ -82,7 +103,7 @@ class Blockchain {
     private Block newGenesisBlock() {
         ArrayList<Transaction> gen = new ArrayList<>();
         try {
-            gen.add(new Transaction(new byte[0], "Genesis block".getBytes(), "Genesis block".getBytes(), true, "temp".getBytes()));
+            gen.add(new Transaction(new byte[0], "Genesis block".getBytes(), "Genesis block".getBytes(), true, new byte[0]));
         } catch (NoSuchAlgorithmException | SignatureException | InvalidKeyException | IOException e) {
             e.printStackTrace();
         }
