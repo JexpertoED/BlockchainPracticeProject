@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 
 class ProofOfWork {
-    private static final int targetZeroes = 3; //number of zeroes * 4
+    private static final int targetZeroes = 3; //number of zeroes
     private Long nonce = -1L;
     private static final int globalThreads = Runtime.getRuntime().availableProcessors();
     Block block;

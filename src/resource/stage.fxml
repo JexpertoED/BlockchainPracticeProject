@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.text.*?>
+<?import java.lang.*?>
+<?import javafx.scene.canvas.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="269.0" prefWidth="372.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Button id="okButtorn" layoutX="318.0" layoutY="232.0" mnemonicParsing="false" text="ОК" />
+      <Label layoutX="91.0" layoutY="14.0" prefHeight="23.0" prefWidth="191.0" text="Введите ваши данные.">
+         <font>
+            <Font name="Tahoma" size="18.0" />
+         </font>
+      </Label>
+      <TextField id="nameField" layoutX="133.0" layoutY="69.0" />
+      <PasswordField id="passwordField" layoutX="133.0" layoutY="176.0" />
+      <TextField id="surnameField" layoutX="133.0" layoutY="105.0" />
+      <PasswordField id="patronymicField" layoutX="133.0" layoutY="139.0" />
+      <Label layoutX="83.0" layoutY="73.0" prefHeight="20.0" prefWidth="33.0" text="Имя">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Label>
+      <Label layoutX="56.0" layoutY="109.0" prefHeight="20.0" prefWidth="60.0" text="Фамилия">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Label>
+      <Label layoutX="56.0" layoutY="143.0" prefHeight="20.0" prefWidth="60.0" text="Отчество">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Label>
+      <Label layoutX="66.0" layoutY="180.0" prefHeight="20.0" prefWidth="50.0" text="Пароль">
+         <font>
+            <Font size="14.0" />
+         </font>
+      </Label>
+      <Label layoutX="69.0" layoutY="70.0" prefHeight="35.0" prefWidth="14.0" text="*" textFill="#ff1c00">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Label>
+      <Label layoutX="42.0" layoutY="107.0" prefHeight="35.0" prefWidth="14.0" text="*" textFill="#ff1c00">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Label>
+      <Label layoutX="50.0" layoutY="178.0" prefHeight="35.0" prefWidth="14.0" text="*" textFill="#ff1c00">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Label>
+      <AmbientLight color="CHARTREUSE" layoutX="318.0" layoutY="49.0" lightOn="true" />
+   </children>
+</AnchorPane>

@@ -8,6 +8,7 @@ import javafx.stage.Stage;
 
 import java.awt.*;
 import java.io.IOException;
+import java.net.URL;
 
 class UserInterface {
     public Stage stage;
@@ -25,12 +26,11 @@ class UserInterface {
 //            e.printStackTrace();
 //        }
 //    }
-    UserInterface(Stage primaryStage, String title, String fxml) throws IOException {
-        Parent root;
-        root = FXMLLoader.load(getClass().getResource(fxml));
+    UserInterface(Stage primaryStage, String title, Parent root) throws IOException {
         Scene scene = new Scene(root);
         primaryStage.setTitle(title);
         primaryStage.setScene(scene);
+        primaryStage.setResizable(false);
         this.stage = primaryStage;
     }
 
@@ -38,5 +38,9 @@ class UserInterface {
 //    public void addTransactionToPool(Transaction transaction) {
 //        unverifiedTransactionPool.add(transaction);
 //    }
+
+    private static void enterData(){
+
+    }
 
 }

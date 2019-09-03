@@ -1,7 +1,5 @@
 package main.java.Blockchain;
 
-import sun.security.provider.SHA;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -14,9 +12,9 @@ public class Transaction implements TransactionInterface {
     private final Input input;
     private final Output output;
 
-    Transaction(byte[] prevHash, byte[] password, byte[] pin, boolean value, byte[] addressPubKeyHash) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, IOException {
+    Transaction(byte[] prevHash, byte[] password, byte[] personData, boolean value, byte[] addressPubKeyHash) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, IOException {
         this.hash = new byte[0];
-        KeyPair keyPair = generateKeypair(getSeed(password, pin));
+        KeyPair keyPair = generateKeypair(getSeed(personData, password));
 
         ByteArrayOutputStream sctiptSig = new ByteArrayOutputStream();
         try {
@@ -31,7 +29,7 @@ public class Transaction implements TransactionInterface {
     }
 
 
-    private static KeyPair generateKeypair(byte[] seed) {
+    public static KeyPair generateKeypair(byte[] seed) {
         KeyPairGenerator keyGen;
         try {
             keyGen = KeyPairGenerator.getInstance("EC");
@@ -48,11 +46,11 @@ public class Transaction implements TransactionInterface {
 //        return digest.digest((password + SHA256.sha256(pin)).getBytes());
 //    }
 
-    private static byte[] getSeed(byte[] password, byte[] pin) throws NoSuchAlgorithmException, IOException {
+    public static byte[] getSeed(byte[] personData, byte[] password) throws NoSuchAlgorithmException, IOException {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        byteArrayOutputStream.write(SHA256.sha256(pin));
-        byteArrayOutputStream.write(password);
+        byteArrayOutputStream.write(SHA256.sha256(personData));
+        byteArrayOutputStream.write(SHA256.sha256(password));
 
         return digest.digest((byteArrayOutputStream.toByteArray()));
     }
@@ -210,4 +208,15 @@ public class Transaction implements TransactionInterface {
         }
     }
 
+    public byte[] getHash() {
+        return hash;
+    }
+
+    public Input getInput() {
+        return input;
+    }
+
+    public Output getOutput() {
+        return output;
+    }
 }
