@@ -88,7 +88,7 @@ public class Block {
         ArrayList<String> shas = new ArrayList<>(transactions.size());
         for (Transaction transaction : transactions) {
             try {
-                shas.add(SHA256.sha256(transaction.getTransactionString()));
+                shas.add(SHA256.sha256(transaction.getTransactionStringForMercle()));
                // System.out.println(transaction.getTransactionString());
             } catch (NullPointerException e) {
              //   System.out.println("Null Pointer");

@@ -16,6 +16,8 @@ class SimpleGUI extends JFrame {
     private JLabel surname = new JLabel("Фамилия");
     private JLabel patronymic = new JLabel("Отчество");
     private JLabel password = new JLabel("Пароль");
+    private JLabel prevHashLabel = new JLabel("Ваш идентификатор:");
+    private JTextField prevHash = new JTextField(20);
     private JTextField nameField = new JTextField(20);
     private JTextField surnameField = new JTextField(20);
     private JTextField patronymicField = new JTextField(20);
@@ -33,24 +35,29 @@ class SimpleGUI extends JFrame {
         surname.setFont(new Font("Consolas", Font.PLAIN, 14));
         patronymic.setFont(new Font("Consolas", Font.PLAIN, 14));
         password.setFont(new Font("Consolas", Font.PLAIN, 14));
+        prevHashLabel.setFont(new Font("Consolas", Font.PLAIN, 14));
 
         title.setHorizontalAlignment(JLabel.CENTER);
         name.setHorizontalAlignment(JLabel.RIGHT);
         surname.setHorizontalAlignment(JLabel.RIGHT);
         patronymic.setHorizontalAlignment(JLabel.RIGHT);
         password.setHorizontalAlignment(JLabel.RIGHT);
+        prevHashLabel.setHorizontalAlignment(JLabel.RIGHT);
         //  name.setBorder(new EmptyBorder(0,0,0,10));
 
         Container container = this.getContentPane();
         container.setLayout(new BorderLayout());
         Container container1 = new Container();
         container.add(container1, BorderLayout.CENTER);
-        container1.setLayout(new GridLayout(4, 3, 10, 0));
+        container1.setLayout(new GridLayout(5, 3, 10, 0));
         container.add(title, BorderLayout.NORTH);
         Container okContainer = new Container();
         okContainer.setLayout(new BorderLayout());
         container.add(okContainer, BorderLayout.SOUTH);
         okContainer.add(okButton, BorderLayout.EAST);
+        container1.add(prevHashLabel);
+        container1.add(prevHash);
+        container1.add(new JLabel(""));
         container1.add(name);
         container1.add(nameField);
         container1.add(new JLabel(""));
@@ -120,7 +127,7 @@ class SimpleGUI extends JFrame {
             Container base1 = new Container();
             base.add(candTitle, BorderLayout.NORTH);
             base.add(base1, BorderLayout.CENTER);
-            base1.setLayout(new GridLayout(3, 3, 10, 0));
+            base1.setLayout(new GridLayout(4, 3, 10, 0));
             Container okButtonContainer = new Container();
             okButtonContainer.setLayout(new BorderLayout());
             base.add(okButtonContainer, BorderLayout.SOUTH);
@@ -145,8 +152,9 @@ class SimpleGUI extends JFrame {
             frame.setAlwaysOnTop(true);
 
             ok.addActionListener(event -> {
+               // System.out.println("asdasd");
                 int candidate = b1.isSelected() ? 1 : (b2.isSelected() ? 2 : 3);
-                //System.out.println(candidate);
+               // System.out.println(candidate);
 //                try {
 //                    KeyPair keyPair = Transaction.generateKeypair(Transaction.getSeed((nameField.getText() + surnameField.getText() + patronymicField.getText()).getBytes(), new String(passwordField.getPassword()).getBytes()));
 //                    System.out.println(Blockchain.bytesToHex(keyPair.getPrivate().getEncoded()));
@@ -156,10 +164,13 @@ class SimpleGUI extends JFrame {
 //                    e1.printStackTrace();
 //                }
                 try {
-                    bc.addTransactionToPool(new Transaction(SHA256.sha256("123asd".getBytes()), new String(passwordField.getPassword()).getBytes(),(nameField.getText() + surnameField.getText() + patronymicField.getText()).getBytes(),true,(Transaction.generateKeypair(String.valueOf(candidate).getBytes()).getPublic().getEncoded())));
+                    byte[]prevHashByte = Blockchain.hexStringToByteArray(prevHash.getText());
+                    bc.addTransactionToPoolWithCheck(new Transaction(prevHashByte, new String(passwordField.getPassword()).getBytes(),(nameField.getText() + surnameField.getText() + patronymicField.getText()).getBytes(),true,(Transaction.generateKeypair(String.valueOf(candidate).getBytes()).getPublic().getEncoded())));
                 } catch (IOException | NoSuchAlgorithmException | SignatureException | InvalidKeyException e1) {
                     e1.printStackTrace();
+                    System.out.println("Exception");
                 }
+
             });
         });
 

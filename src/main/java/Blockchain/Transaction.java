@@ -13,19 +13,18 @@ public class Transaction implements TransactionInterface {
     private final Output output;
 
     Transaction(byte[] prevHash, byte[] password, byte[] personData, boolean value, byte[] addressPubKeyHash) throws NoSuchAlgorithmException, SignatureException, InvalidKeyException, IOException {
-        this.hash = new byte[0];
         KeyPair keyPair = generateKeypair(getSeed(personData, password));
-
         ByteArrayOutputStream sctiptSig = new ByteArrayOutputStream();
         try {
             assert keyPair != null;
             sctiptSig.write(keyPair.getPublic().getEncoded());
-            sctiptSig.write(generateSignature(keyPair.getPrivate()));
+            sctiptSig.write(generateSignature(keyPair.getPrivate(),prevHash, addressPubKeyHash));
         } catch (IOException e) {
             e.printStackTrace();
         }
         this.input = new Input(prevHash, sctiptSig.toByteArray());
         this.output = new Output(true, addressPubKeyHash);
+        this.hash = generateHash();
     }
 
 
@@ -55,28 +54,28 @@ public class Transaction implements TransactionInterface {
         return digest.digest((byteArrayOutputStream.toByteArray()));
     }
 
-    private byte[] generateSignature(PrivateKey privateKey) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+    private byte[] generateSignature(PrivateKey privateKey, byte[] prevHash, byte[] addressPubKeyHash) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
         Signature ecdsa = Signature.getInstance("SHA256withECDSA");
         ecdsa.initSign(privateKey);
         //String str = this.hash + this.input.prevHash + this.output.pubKeyHash + this.output.value;
-        String str = getTransactionString();
+        String str = getTransactionHash(prevHash, addressPubKeyHash);
         byte[] strByte = str.getBytes(StandardCharsets.UTF_8);
         ecdsa.update(strByte);
         return ecdsa.sign();
     }
 
-    private boolean verifySignature(PublicKey publicKey, byte[] sig) throws SignatureException, InvalidKeyException, NoSuchAlgorithmException {
+    public boolean verifySignature(PublicKey publicKey, byte[] sig) throws SignatureException, InvalidKeyException, NoSuchAlgorithmException {
         Signature ecdsaVerify = Signature.getInstance("SHA256withECDSA");
         ecdsaVerify.initVerify(publicKey);
         //String str = this.hash + this.input.prevHash + this.output.pubKeyHash + this.output.value;
-        String str = getTransactionString();
+        String str = getTransactionHash();
         byte[] strByte = str.getBytes(StandardCharsets.UTF_8);
         ecdsaVerify.update(strByte);
         return ecdsaVerify.verify(sig);
     }
 
-    public boolean verifySignature(byte[] pubSig) throws SignatureException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
-        return verifySignature(getPublicKeyFromByte(Arrays.copyOf(pubSig, 91)), Arrays.copyOf(pubSig, pubSig.length - 91));
+    public boolean verifySignature() throws SignatureException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException {
+        return verifySignature(getPublicKeyFromByte(getPubKeyFromScriptSig(this.input.scriptSig)), getSignatureFromScriptSig(this.input.scriptSig));
     }
 
     private static KeyPair getKeyPairFromByte(byte[] privateKeyBytes, byte[] publicKeyBytes) throws NoSuchAlgorithmException, InvalidKeySpecException {
@@ -85,13 +84,13 @@ public class Transaction implements TransactionInterface {
         return new KeyPair(publicKey, privateKey);
     }
 
-    private static PrivateKey getPrivateKeyFromByte(byte[] privateKeyBytes) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public static PrivateKey getPrivateKeyFromByte(byte[] privateKeyBytes) throws NoSuchAlgorithmException, InvalidKeySpecException {
         KeyFactory keyFactory = KeyFactory.getInstance("EC");
         EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
         return keyFactory.generatePrivate(privateKeySpec);
     }
 
-    private static PublicKey getPublicKeyFromByte(byte[] publicKeyBytes) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public static PublicKey getPublicKeyFromByte(byte[] publicKeyBytes) throws NoSuchAlgorithmException, InvalidKeySpecException {
         KeyFactory keyFactory = KeyFactory.getInstance("EC");
         EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
         return keyFactory.generatePublic(publicKeySpec);
@@ -135,6 +134,32 @@ public class Transaction implements TransactionInterface {
 
     private byte[] getTransactionBytes() {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+//        try {
+//            outputStream.write(this.hash);
+//        } catch (Exception e) {
+//            //System.out.println("Exceptrionnn!1");
+//        }
+        try {
+            outputStream.write(this.input.prevHash);
+        } catch (Exception e) {
+            System.out.println("Exceptrionnn!2");
+        }
+//        try {
+//            outputStream.write(this.input.scriptSig);
+//        } catch (Exception e) {
+//            System.out.println("Exceptrionnn!3");
+//        }
+        try {
+            outputStream.write(this.output.pubKeyHash);
+        } catch (Exception e) {
+            // System.out.println("Exceptrionnn!4");
+        }
+
+        return outputStream.toByteArray();
+    }
+
+    private byte[] getTransactionBytesForMercle() {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         try {
             outputStream.write(this.hash);
         } catch (Exception e) {
@@ -143,16 +168,15 @@ public class Transaction implements TransactionInterface {
         try {
             outputStream.write(this.input.prevHash);
         } catch (Exception e) {
-            //System.out.println("Exceptrionnn!2");
+           // System.out.println("Exceptrionnn!2");
         }
         try {
             outputStream.write(this.input.scriptSig);
         } catch (Exception e) {
-            // System.out.println("Exceptrionnn!3");
+            //System.out.println("Exceptrionnn!3");
         }
         try {
             outputStream.write(this.output.pubKeyHash);
-            outputStream.write(String.valueOf(this.output.value).getBytes());
         } catch (Exception e) {
             // System.out.println("Exceptrionnn!4");
         }
@@ -160,14 +184,41 @@ public class Transaction implements TransactionInterface {
         return outputStream.toByteArray();
     }
 
+    private byte[] getTransactionBytes(byte[] prevHash, byte[] addressPubKeyHash) {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        try {
+            outputStream.write(prevHash);
+        } catch (Exception e) {
+            //System.out.println("Exceptrionnn!2");
+        }
+        try {
+            outputStream.write(addressPubKeyHash);
+        } catch (Exception e) {
+             //System.out.println("Exceptrionnn!4");
+        }
+
+        return outputStream.toByteArray();
+    }
+
+
     String getTransactionString() {
         return Blockchain.bytesToHex(getTransactionBytes());
+    }
+
+    String getTransactionStringForMercle() {
+        return Blockchain.bytesToHex(getTransactionBytesForMercle());
     }
 
     public String getTransactionHash() throws NoSuchAlgorithmException {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
 
         return Blockchain.bytesToHex(digest.digest(getTransactionBytes()));
+    }
+
+    public String getTransactionHash(byte[] prevHash, byte[] addressPubKeyHash) throws NoSuchAlgorithmException {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+
+        return Blockchain.bytesToHex(digest.digest(getTransactionBytes(prevHash,addressPubKeyHash)));
     }
 
     @Override
@@ -212,11 +263,30 @@ public class Transaction implements TransactionInterface {
         return hash;
     }
 
+    byte[] generateHash() {
+        try {
+            return SHA256.sha256(Blockchain.hexStringToByteArray(Blockchain.bytesToHex(this.input.prevHash) + Blockchain.bytesToHex(this.input.scriptSig) + Blockchain.bytesToHex(this.output.pubKeyHash)));
+        } catch (Exception e) {
+        }
+        return new byte[0];
+    }
+
     public Input getInput() {
         return input;
     }
 
     public Output getOutput() {
         return output;
+    }
+
+    public static byte[] getPubKeyFromScriptSig(byte[] scriptSig) {
+        return Arrays.copyOf(scriptSig, 91);
+    }
+
+    public static byte[] getSignatureFromScriptSig(byte[] scriptSig) {
+        int sigLength = scriptSig.length - 91;
+        byte[] sig = new byte[sigLength];
+        System.arraycopy(scriptSig, 91, sig, 0, sigLength);
+        return sig;
     }
 }
