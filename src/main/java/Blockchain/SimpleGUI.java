@@ -145,8 +145,9 @@ class SimpleGUI extends JFrame {
             frame.setAlwaysOnTop(true);
 
             ok.addActionListener(event -> {
+               // System.out.println("asdasd");
                 int candidate = b1.isSelected() ? 1 : (b2.isSelected() ? 2 : 3);
-                //System.out.println(candidate);
+               // System.out.println(candidate);
 //                try {
 //                    KeyPair keyPair = Transaction.generateKeypair(Transaction.getSeed((nameField.getText() + surnameField.getText() + patronymicField.getText()).getBytes(), new String(passwordField.getPassword()).getBytes()));
 //                    System.out.println(Blockchain.bytesToHex(keyPair.getPrivate().getEncoded()));
@@ -159,7 +160,9 @@ class SimpleGUI extends JFrame {
                     bc.addTransactionToPool(new Transaction(SHA256.sha256("123asd".getBytes()), new String(passwordField.getPassword()).getBytes(),(nameField.getText() + surnameField.getText() + patronymicField.getText()).getBytes(),true,(Transaction.generateKeypair(String.valueOf(candidate).getBytes()).getPublic().getEncoded())));
                 } catch (IOException | NoSuchAlgorithmException | SignatureException | InvalidKeyException e1) {
                     e1.printStackTrace();
+                    System.out.println("Exception");
                 }
+
             });
         });
 

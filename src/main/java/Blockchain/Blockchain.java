@@ -9,11 +9,14 @@ import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Handler;
 
 class Blockchain {
     private static final int blockSize = 4;
     private List<Block> blocks;
     private ArrayList<Transaction> transactionPool = new ArrayList<>();
+    private ArrayList<EventListener.AddBlockEvent> handlers = new ArrayList<>();
+    private int poolTransactionsCount = 0;
 
     List<Block> getBlocks() {
         return blocks;
@@ -22,34 +25,35 @@ class Blockchain {
 
     void run() throws InterruptedException {
         Thread a = null;
-        Thread finalB = a;
+        //Thread finalB = a;
         a = new Thread(() -> {
             ArrayList<Transaction> temp = new ArrayList<>();
             while (true) {
                 synchronized (transactionPool) {
                     try {
-                        if (!transactionPool.isEmpty() || temp.size() >= blockSize) {
-
-                            temp.add(transactionPool.get(0));
-                            transactionPool.remove(0);
+                        if (temp.size() < blockSize && !transactionPool.isEmpty()) {
+                                temp.add(transactionPool.get(0));
+                            //    System.out.println(temp);
+                                transactionPool.remove(0);
                         } else if (!temp.isEmpty()) {
-                           //System.out.println(temp);
+                          // System.out.println(temp + "   1");
                             addBlock(temp);
                             temp = new ArrayList<>();
                         }
                     } catch (IndexOutOfBoundsException ignore) {
                     }
-
                 }
-                try {
-                    finalB.sleep(1);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+//                try {
+//                    finalB.sleep(1);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
             }
         });
         a.start();
         //a.join();
+
+
 
     }
 
@@ -66,9 +70,11 @@ class Blockchain {
             //System.out.println(transactions);
         }
     }
-    void addTransactionToPool(Transaction transaction) throws IOException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+    void addTransactionToPool(Transaction transaction) {
         transactionPool.add(transaction);
+        fireEventListeners(transaction);
     }
+
     void addTransactionToPoolWithCheck(Transaction transaction) throws IOException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
 //        boolean allowCheck = false;
 //        for (Block block : blocks){
@@ -90,7 +96,9 @@ class Blockchain {
 
     Blockchain() {
         List<Block> blocks = new ArrayList<>(1);
-        blocks.add(newGenesisBlock());
+        Block genesisBlock = newGenesisBlock();
+        blocks.add(genesisBlock);
+        this.fireEventListeners(genesisBlock);
         this.blocks = blocks;
     }
 
@@ -98,6 +106,7 @@ class Blockchain {
         Block prevBlock = this.blocks.get(this.blocks.size() - 1);
         Block newBlock = Block.generateBlock(transactions, prevBlock.getHash());
         this.blocks.add(newBlock);
+        this.fireEventListeners(newBlock);
     }
 
     private Block newGenesisBlock() {
@@ -108,6 +117,25 @@ class Blockchain {
             e.printStackTrace();
         }
         return Block.generateBlock(gen, new byte[0]);
+    }
+
+
+    public void addEventListener(EventListener.AddBlockEvent a){
+        handlers.add(a);
+    }
+
+    public void addEventListener(EventListener.AddTransactionEvent a){
+
+    }
+
+    private void fireEventListeners(Transaction transaction){
+
+    }
+
+    private void fireEventListeners(Block block){
+        for(EventListener.AddBlockEvent a : handlers){
+            a.run(block);
+        }
     }
 
 //////////////////////////////
